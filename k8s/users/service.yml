@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: users
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: users
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: users
+  ports:
+  - name: http
+    port: 80
+    targetPort: http

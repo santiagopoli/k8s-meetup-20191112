@@ -1,0 +1,84 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: traefik
+    spec:
+      serviceAccountName: traefik
+      volumes:
+      - name: opa-configuration
+        configMap:
+          name: opa-configuration
+      containers:
+      - image: traefik
+        name: traefik
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 30Mi
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: web
+          containerPort: 8080
+        args:
+        - --web
+        - --kubernetes
+        - --entrypoints=Name:http Address::80 Redirect.EntryPoint:https
+        - --entrypoints=Name:https Address::443 TLS Auth.Forward.Address:http://localhost:8121/authz
+        - --defaultentrypoints=https
+      - name: middleman
+        image: santiagopoli/middleman:latest
+        imagePullPolicy: Always
+        args:
+        - --middleware.HostHeader=X-Forwarded-Host
+        - --middleware.MethodHeader=X-Forwarded-Method
+        - --middleware.PathHeader=X-Forwarded-Uri
+        - --opa.Host=localhost:8181
+        - --opa.DefaultPolicy=ingress/allow
+        - --opa.UsePartialEvaluation=false
+        resources:
+          requests:
+            cpu: 250m
+            memory: 250M
+          limits:
+            cpu: 250m
+            memory: 250M
+        ports:
+        - name: http
+          containerPort: 8121
+      - name: opa
+        image: openpolicyagent/opa:0.13.3
+        args:
+        - run
+        - -s
+        - -c=/etc/opa/config.yml
+        resources:
+          requests:
+            cpu: 250m
+            memory: 250M
+          limits:
+            cpu: 250m
+            memory: 250M
+        volumeMounts:
+        - name: opa-configuration
+          mountPath: /etc/opa/config.yml
+          subPath: config.yml
+          readOnly: true

@@ -1,0 +1,35 @@
+language: bash
+
+services:
+- docker
+
+jobs:
+  include:
+
+  - stage: deploy
+    name: "Update OPA Bundle"
+    before_install:
+    - pip install --user awscli
+    script:
+    - tar -czvf bundle.tar.gz -C bundle .
+    - aws s3 cp bundle.tar.gz s3://opa-talk/bundle.tar.gz --acl public-read
+
+  - stage: deploy
+    name: "Deploy users image to Docker Hub"
+    services: docker
+    env:
+    - VERSION=latest
+    script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t "$DOCKER_USERNAME/opa-talk-users:$VERSION" services/users
+    - docker push "$DOCKER_USERNAME/opa-talk-users:$VERSION"
+
+  - stage: deploy
+    name: "Deploy likes image to Docker Hub"
+    services: docker
+    env:
+    - VERSION=latest
+    script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t "$DOCKER_USERNAME/opa-talk-likes:$VERSION" services/likes
+    - docker push "$DOCKER_USERNAME/opa-talk-likes:$VERSION"

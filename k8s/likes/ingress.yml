@@ -1,0 +1,21 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: likes
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: likes
+spec:
+  tls:
+  - hosts:
+      - santiagopoli.io
+    secretName: tls-cert
+  rules:
+  - host: api.santiagopoli.io
+    http:
+      paths:
+      - path: /users/{userId}/likes
+        backend:
+          serviceName: likes
+          servicePort: http

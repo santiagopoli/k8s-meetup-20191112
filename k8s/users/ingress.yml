@@ -1,0 +1,21 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: users
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: users
+spec:
+  tls:
+  - hosts:
+      - santiagopoli.io
+    secretName: tls-cert
+  rules:
+  - host: api.santiagopoli.io
+    http:
+      paths:
+      - path: /users/{userId}
+        backend:
+          serviceName: users
+          servicePort: http
