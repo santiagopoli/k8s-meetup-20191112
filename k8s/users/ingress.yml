@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: users
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: users
+  annotations:
+    traefik.ingress.kubernetes.io/rule-type: Path
+spec:
+  tls:
+  - hosts:
+    - example.com
+    secretName: tls-cert
+  rules:
+  - host: api.example.com
+    http:
+      paths:
+      - path: /users/{userId}
+        backend:
+          serviceName: users
+          servicePort: http

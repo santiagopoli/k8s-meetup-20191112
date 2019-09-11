@@ -1,0 +1,20 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: opa-configuration
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: middleman
+data:
+  config.yml: |
+    services:
+    - name: github
+      url: https://github.com/santiagopoli/k8s-meetup-20191112/releases/download/latest/
+    bundle:
+      name: bundle.tar.gz
+      service: github
+      prefix: /
+      polling:
+        min_delay_seconds: 5
+        max_delay_seconds: 15

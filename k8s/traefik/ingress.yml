@@ -1,0 +1,22 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/rule-type: PathPrefix
+spec:
+  tls:
+  - hosts:
+    - example.com
+    secretName: tls-cert
+  rules:
+  - host: traefik.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: traefik-web
+          servicePort: web

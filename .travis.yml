@@ -1,0 +1,33 @@
+language: bash
+
+jobs:
+  include:
+
+  - stage: deploy
+    language: go
+    name: "Update OPA Bundle"
+    before_install:
+    - go get github.com/aktau/github-release
+    script:
+    - tar -czvf bundle.tar.gz -C bundle .
+    - github-release upload --replace --user $GITHUB_USER --repo $GITHUB_REPO --tag latest --name "bundle.tar.gz" --file bundle.tar.gz
+
+  - stage: deploy
+    name: "Deploy users image to Docker Hub"
+    services: docker
+    env:
+    - VERSION=latest
+    script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t "$DOCKER_USERNAME/opa-talk-users:$VERSION" services/users
+    - docker push "$DOCKER_USERNAME/opa-talk-users:$VERSION"
+
+  - stage: deploy
+    name: "Deploy likes image to Docker Hub"
+    services: docker
+    env:
+    - VERSION=latest
+    script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t "$DOCKER_USERNAME/opa-talk-likes:$VERSION" services/likes
+    - docker push "$DOCKER_USERNAME/opa-talk-likes:$VERSION"

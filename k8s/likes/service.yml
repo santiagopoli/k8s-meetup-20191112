@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: likes
+  namespace: opa-talk
+  labels:
+    app.kubernetes.io/name: likes
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: likes
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
